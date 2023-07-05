@@ -23,6 +23,8 @@ public class CmdDungeon {
     @Permission("dungeon.test")
     public static void dungeonTest(Player player) {
         DungeonBuilder dungeonBuilder = new DungeonBuilder(new TestDungeon());
+        dungeonBuilder.generate(0, 0, 0, 0);
+        dungeonBuilder.preview(player);
     }
 
 }

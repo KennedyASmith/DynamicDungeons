@@ -2,7 +2,7 @@ package com.kennedysmithjava.dynamicdungeons.nodes;
 
 import com.kennedysmithjava.dynamicdungeons.util.ChunkCoordinate;
 
-public class Node {
+public abstract class Node {
 
 
     private final ChunkCoordinate coordinate;
@@ -14,4 +14,6 @@ public class Node {
     public ChunkCoordinate getCoordinate(){
         return coordinate;
     }
+
+    public abstract TypeNode getType();
 }

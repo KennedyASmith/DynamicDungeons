@@ -1,5 +1,9 @@
 package com.kennedysmithjava.dynamicdungeons.util;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum Direction {
     WEST,
     EAST,
@@ -43,5 +47,9 @@ public enum Direction {
             default:
                 return WEST;
         }
+    }
+
+    public static List<Direction> allExcept(Direction direction){
+        return Arrays.stream(values()).filter(value -> !value.equals(direction)).collect(Collectors.toList());
     }
 }

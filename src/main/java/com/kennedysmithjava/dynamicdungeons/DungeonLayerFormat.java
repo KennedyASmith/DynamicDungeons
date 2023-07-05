@@ -133,22 +133,14 @@ public class DungeonLayerFormat {
         int currentX = pathContext.getX();
         int currentY = pathContext.getY();
         int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate;
-        switch (direction){
-            case NORTH:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ - 1);
-                break;
-            case WEST:
-                newChunkCoordinate = new ChunkCoordinate(currentX - 1, currentY, currentZ);
-                break;
-            case EAST:
-                newChunkCoordinate = new ChunkCoordinate(currentX + 1, currentY, currentZ);
-                break;
-            default:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ + 1);
-                break;
-        }
+        ChunkCoordinate newChunkCoordinate = switch (direction) {
+            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+        };
         NodeStart node = new NodeStart(newChunkCoordinate);
+        pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
         pathContext.setCurrentCoordinate(newChunkCoordinate);
@@ -160,22 +152,14 @@ public class DungeonLayerFormat {
         int currentX = pathContext.getX();
         int currentY = pathContext.getY();
         int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate;
-        switch (direction){
-            case NORTH:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ - 1);
-                break;
-            case WEST:
-                newChunkCoordinate = new ChunkCoordinate(currentX - 1, currentY, currentZ);
-                break;
-            case EAST:
-                newChunkCoordinate = new ChunkCoordinate(currentX + 1, currentY, currentZ);
-                break;
-            default:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ + 1);
-                break;
-        }
+        ChunkCoordinate newChunkCoordinate = switch (direction) {
+            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+        };
         NodeStraight node = new NodeStraight(newChunkCoordinate);
+        pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
         pathContext.setCurrentCoordinate(newChunkCoordinate);
@@ -187,22 +171,14 @@ public class DungeonLayerFormat {
         int currentX = pathContext.getX();
         int currentY = pathContext.getY();
         int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate;
-        switch (direction){
-            case NORTH:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ - 1);
-                break;
-            case WEST:
-                newChunkCoordinate = new ChunkCoordinate(currentX - 1, currentY, currentZ);
-                break;
-            case EAST:
-                newChunkCoordinate = new ChunkCoordinate(currentX + 1, currentY, currentZ);
-                break;
-            default:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ + 1);
-                break;
-        }
+        ChunkCoordinate newChunkCoordinate = switch (direction) {
+            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+        };
         NodeEnd node = new NodeEnd(newChunkCoordinate);
+        pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
         pathContext.setCurrentCoordinate(newChunkCoordinate);
@@ -214,22 +190,14 @@ public class DungeonLayerFormat {
         int currentX = pathContext.getX();
         int currentY = pathContext.getY();
         int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate;
-        switch (direction){
-            case NORTH:
-                newChunkCoordinate = new ChunkCoordinate(currentX - 1, currentY, currentZ);
-                break;
-            case WEST:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ + 1);
-                break;
-            case EAST:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ - 1);
-                break;
-            default:
-                newChunkCoordinate = new ChunkCoordinate(currentX + 1, currentY, currentZ);
-                break;
-        }
+        ChunkCoordinate newChunkCoordinate = switch (direction) {
+            case NORTH -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            default -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+        };
         NodeLeftCorner node = new NodeLeftCorner(newChunkCoordinate);
+        pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
         pathContext.setCurrentCoordinate(newChunkCoordinate);
@@ -241,22 +209,14 @@ public class DungeonLayerFormat {
         int currentX = pathContext.getX();
         int currentY = pathContext.getY();
         int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate;
-        switch (direction){
-            case NORTH:
-                newChunkCoordinate = new ChunkCoordinate(currentX + 1, currentY, currentZ);
-                break;
-            case WEST:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ - 1);
-                break;
-            case EAST:
-                newChunkCoordinate = new ChunkCoordinate(currentX, currentY, currentZ + 1);
-                break;
-            default:
-                newChunkCoordinate = new ChunkCoordinate(currentX - 1, currentY, currentZ);
-                break;
-        }
+        ChunkCoordinate newChunkCoordinate = switch (direction) {
+            case NORTH -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+            default -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+        };
         NodeRightCorner node = new NodeRightCorner(newChunkCoordinate);
+        pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
         pathContext.setCurrentCoordinate(newChunkCoordinate);
