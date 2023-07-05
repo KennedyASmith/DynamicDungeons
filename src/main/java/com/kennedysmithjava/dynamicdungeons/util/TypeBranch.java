@@ -7,7 +7,6 @@ public enum TypeBranch {
     CROSS,
 }
 
-
 /*
     Cross
     [0][=][0]
