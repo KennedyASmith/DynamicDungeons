@@ -11,45 +11,69 @@ public enum Direction {
     SOUTH;
 
     public Direction invert(){
-        switch(this){
-            case SOUTH:
-                return NORTH;
-            case EAST:
-                return WEST;
-            case WEST:
-                return EAST;
-            default:
-                return SOUTH;
-        }
+        return switch (this) {
+            case SOUTH -> NORTH;
+            case EAST -> WEST;
+            case WEST -> EAST;
+            default -> SOUTH;
+        };
     }
 
     public Direction getRight(){
-        switch(this){
-            case SOUTH:
-                return WEST;
-            case EAST:
-                return SOUTH;
-            case WEST:
-                return NORTH;
-            default:
-                return EAST;
-        }
+        return switch (this) {
+            case SOUTH -> WEST;
+            case EAST -> SOUTH;
+            case WEST -> NORTH;
+            default -> EAST;
+        };
     }
 
     public Direction getLeft(){
-        switch(this){
-            case SOUTH:
-                return EAST;
-            case EAST:
-                return NORTH;
-            case WEST:
-                return SOUTH;
-            default:
-                return WEST;
-        }
+        return switch (this) {
+            case SOUTH -> EAST;
+            case EAST -> NORTH;
+            case WEST -> SOUTH;
+            default -> WEST;
+        };
     }
 
     public static List<Direction> allExcept(Direction direction){
         return Arrays.stream(values()).filter(value -> !value.equals(direction)).collect(Collectors.toList());
+    }
+
+    public ChunkCoordinate getLeftCoordinate(ChunkCoordinate current){
+        int currentX = current.getX();
+        int currentY = current.getY();
+        int currentZ = current.getZ();
+        return switch (this) {
+            case NORTH -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            default -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+        };
+    }
+
+    public ChunkCoordinate getRightCoordinate(ChunkCoordinate current){
+        int currentX = current.getX();
+        int currentY = current.getY();
+        int currentZ = current.getZ();
+        return switch (this) {
+            case NORTH -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+            default -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+        };
+    }
+
+    public ChunkCoordinate getFrontCoordinate(ChunkCoordinate current){
+        int currentX = current.getX();
+        int currentY = current.getY();
+        int currentZ = current.getZ();
+        return switch (this) {
+            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
+            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
+            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
+            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
+        };
     }
 }
