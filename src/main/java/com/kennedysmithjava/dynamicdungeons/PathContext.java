@@ -13,12 +13,14 @@ public class PathContext {
     //Total
 
     //Count branches in a path
+    //Current path depth and overall depth
 
-    int pathLength = 0;
-    ChunkCoordinate currentCoordinte;
-    LayerContext layerContext;
+    private int pathLength = 0;
+    private ChunkCoordinate currentCoordinate;
+    private LayerContext layerContext;
+    private String color = "&7";
 
-    NodeTypeRecord nodeTypeRecord;
+    private NodeTypeRecord nodeTypeRecord;
 
     /*
 
@@ -32,19 +34,19 @@ public class PathContext {
 
     public PathContext(LayerContext layerContext, int pathLength, int currentChunkX, int currentChunkY, int currentChunkZ) {
         this.pathLength = pathLength;
-        this.currentCoordinte = new ChunkCoordinate(currentChunkX, currentChunkY, currentChunkZ);
+        this.currentCoordinate = new ChunkCoordinate(currentChunkX, currentChunkY, currentChunkZ);
         this.layerContext = layerContext;
     }
 
     public PathContext(LayerContext layerContext, int currentChunkX, int currentChunkY, int currentChunkZ) {
         this.pathLength = 0;
-        this.currentCoordinte = new ChunkCoordinate(currentChunkX, currentChunkY, currentChunkZ);
+        this.currentCoordinate = new ChunkCoordinate(currentChunkX, currentChunkY, currentChunkZ);
         this.layerContext = layerContext;
     }
 
     public PathContext(LayerContext layerContext, ChunkCoordinate coordinate) {
         this.pathLength = 0;
-        this.currentCoordinte = coordinate;
+        this.currentCoordinate = coordinate;
         this.layerContext = layerContext;
     }
 
@@ -53,13 +55,13 @@ public class PathContext {
     }
 
     public int getX(){
-        return currentCoordinte.getX();
+        return currentCoordinate.getX();
     }
     public int getY(){
-        return currentCoordinte.getY();
+        return currentCoordinate.getY();
     }
     public int getZ(){
-        return currentCoordinte.getZ();
+        return currentCoordinate.getZ();
     }
 
     public void incrementNodes(){
@@ -67,7 +69,7 @@ public class PathContext {
     }
 
     public void setCurrentCoordinate(ChunkCoordinate coordinate){
-        this.currentCoordinte = coordinate;
+        this.currentCoordinate = coordinate;
     }
 
     public LayerContext getLayerContext() {
@@ -86,5 +88,17 @@ public class PathContext {
         if(nodeTypeRecord == null) return 0;
         if(nodeTypeRecord.getLastNodeType() != type) return 0;
         return nodeTypeRecord.getCount();
+    }
+
+    public ChunkCoordinate getCurrentCoordinate() {
+        return currentCoordinate;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getColor() {
+        return color;
     }
 }

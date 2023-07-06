@@ -1,6 +1,7 @@
 package com.kennedysmithjava.dynamicdungeons.util;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
 
@@ -8,6 +9,11 @@ public class Util {
     @SafeVarargs
     public static <T> List<T> list(T... elements) {
         return new ArrayList<>(Arrays.asList(elements));
+    }
+
+    @SafeVarargs
+    public static <T> Set<T> set(T... elements) {
+        return new HashSet<>(Arrays.asList(elements));
     }
 
     @SuppressWarnings("unchecked")
@@ -28,4 +34,29 @@ public class Util {
         return map;
     }
 
+    public static <T> T pickRandom(List<T> list) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("List cannot be null or empty");
+        }
+
+        int randomIndex = ThreadLocalRandom.current().nextInt(list.size());
+        return list.get(randomIndex);
+    }
+
+    public static <T> T pickRandom(Set<T> set) {
+        if (set == null || set.isEmpty()) {
+            throw new IllegalArgumentException("Set cannot be null or empty");
+        }
+
+        int randomIndex = ThreadLocalRandom.current().nextInt(set.size());
+        int currentIndex = 0;
+        for (T element : set) {
+            if (currentIndex == randomIndex) {
+                return element;
+            }
+            currentIndex++;
+        }
+
+        throw new IllegalStateException("Failed to pick a random element");
+    }
 }

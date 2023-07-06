@@ -16,11 +16,12 @@ public class ExpressionWrapper {
     private final Map<String, Function<PathContext, Double>> variables;
 
     private final static List<Operator> operators = CustomOperator.getOperators();
+    private final static List<net.objecthunter.exp4j.function.Function> functions = CustomFunctions.getFunctions();
 
 
     public ExpressionWrapper(String expression) {
         this.variables = Variable.extract(expression);
-        this.expression = new ExpressionBuilder(expression).operator(operators).variables(variables.keySet()).build();
+        this.expression = new ExpressionBuilder(expression).functions(functions).operator(operators).variables(variables.keySet()).build();
     }
 
     public Map<String, Function<PathContext, Double>> getVariables() {

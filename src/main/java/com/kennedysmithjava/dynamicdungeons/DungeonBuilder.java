@@ -1,16 +1,10 @@
 package com.kennedysmithjava.dynamicdungeons;
 
 import com.kennedysmithjava.dynamicdungeons.nodes.*;
-import com.kennedysmithjava.dynamicdungeons.util.ChunkCoordinate;
-import com.kennedysmithjava.dynamicdungeons.util.Color;
-import com.kennedysmithjava.dynamicdungeons.util.Direction;
-import org.bukkit.Bukkit;
+import com.kennedysmithjava.dynamicdungeons.util.*;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DungeonBuilder {
     private final Map<Integer, DungeonLayerFormat> layerFormats;
@@ -27,9 +21,8 @@ public class DungeonBuilder {
         LayerContext layerContext = new LayerContext(startLayer);
         PathContext pathContext = new PathContext(layerContext, chunkX, chunkY, chunkZ);
         Node start = startLayerFormat.genStart(Direction.NORTH, layerContext, pathContext);
-        List<Node> layer = continuePath(Direction.NORTH, startLayerFormat, layerContext, pathContext);
-        layer.add(start);
-        this.addNodes(layer, startLayer);
+        addNode(startLayer, start);
+        continuePath(Direction.NORTH, startLayer, startLayerFormat, layerContext, pathContext);
     }
 
     public void preview(Player player){
@@ -45,15 +38,9 @@ public class DungeonBuilder {
                 ChunkCoordinate coordinate = new ChunkCoordinate(x, 0, z);
                 Node node = nodes.get(coordinate);
                 if(node != null){
-                    if(node instanceof NodeStart){
-                        row.append("&a⬛");
-                    }else if(node instanceof NodeEnd){
-                        row.append("&c⬛");
-                    }else{
-                        row.append("&e⬛");
-                    }
+                    row.append(node.getColoredSymbol());
                 }else{
-                    row.append("&7⬛");
+                    row.append("&8⧇");
                 }
             }
             player.sendMessage(Color.get(row.toString()));
@@ -66,31 +53,45 @@ public class DungeonBuilder {
         [0](\)[0]
      */
 
-    public List<Node> continuePath(Direction facing, DungeonLayerFormat layer, LayerContext layerContext, PathContext pathContext){
-        List<Node> nodes = new ArrayList<>();
-        Node node;
-        if(pathContext.getPathLength() >= layer.getMaxPathLength()){
-            node = layer.genEnd(facing, layerContext, pathContext);
-        }else if(canGenLeft(facing, pathContext) && layer.shouldGenLeft(pathContext)){
-            node = layer.genLeft(facing, layerContext, pathContext);
-            nodes.addAll(continuePath(facing.getLeft(), layer, layerContext, pathContext));
-        }else if(canGenRight(facing, pathContext) && layer.shouldGenRight(pathContext)){
-            node = layer.genRight(facing, layerContext, pathContext);
-            nodes.addAll(continuePath(facing.getRight(), layer, layerContext, pathContext));
-        }else if(canGenStraight(facing, pathContext) && layer.shouldGenStraight(pathContext)){
-            node = layer.genStraight(facing, layerContext, pathContext);
-            nodes.addAll(continuePath(facing, layer, layerContext, pathContext));
-        }else if(canGenBranch(facing, pathContext) && layer.shouldGenBranch(pathContext)){
-            node = layer.genBranch(facing, layerContext, pathContext);
-            for (Direction branchFacing : Direction.allExcept(facing.invert())) {
-                nodes.addAll(continuePath(branchFacing, layer, layerContext, new PathContext(layerContext, pathContext.currentCoordinte)));
-            }
-        } else {
-            node = layer.genEnd(facing, layerContext, pathContext);
-        }
+    private final static LoopIterator<String> colorIterator = new LoopIterator<>(Util.list("&e", "&b", "&a", "&9", "&7", "&6", "&5", "&3", "&1"));
 
-        nodes.add(node);
-        return nodes;
+
+    public void continuePath(Direction facing, int layer, DungeonLayerFormat lf, LayerContext layerContext, PathContext pathContext){
+        Node node;
+        if(pathContext.getPathLength() >= lf.getMaxPathLength()){
+            node = lf.genEnd(facing, layerContext, pathContext);
+            addNode(layer, node);
+        }else if(canGenLeft(facing, pathContext) && lf.shouldGenLeft(pathContext)){
+            node = lf.genLeft(facing, layerContext, pathContext);
+            addNode(layer, node);
+            continuePath(facing.getLeft(), layer, lf, layerContext, pathContext);
+
+        }else if(canGenRight(facing, pathContext) && lf.shouldGenRight(pathContext)){
+            node = lf.genRight(facing, layerContext, pathContext);
+            addNode(layer, node);
+            continuePath(facing.getRight(), layer, lf, layerContext, pathContext);
+
+        }else if(canGenBranch(facing, pathContext) && lf.shouldGenBranch(pathContext)){
+            List<TypeBranch> availableBranches = getBranchAvailability(facing, pathContext);
+            TypeBranch chosenBranch = Util.pickRandom(availableBranches);
+            ChunkCoordinate currentCoordinate = pathContext.getCurrentCoordinate();
+            node = lf.genBranch(facing, chosenBranch, layerContext, pathContext);
+            addNode(layer, node);
+            chosenBranch.getDirections(facing, currentCoordinate).forEach((direction, coordinate) -> {
+                PathContext newContext = new PathContext(layerContext, coordinate);
+                newContext.setColor(colorIterator.next());
+                continuePath(direction, layer, lf, layerContext, newContext);
+            });
+
+        } else if(canGenStraight(facing, pathContext) && lf.shouldGenStraight(pathContext)){
+            node = lf.genStraight(facing, layerContext, pathContext);
+            addNode(layer, node);
+            continuePath(facing, layer, lf, layerContext, pathContext);
+
+        }else {
+            node = lf.genEnd(facing, layerContext, pathContext);
+            addNode(layer, node);
+        }
 
         /**/
 
@@ -120,40 +121,88 @@ public class DungeonBuilder {
             case NORTH ->
                     isFree(context.getX(), context.getY(), context.getZ() - 1); // This 1 should scale depending on schem size
             case WEST -> isFree(context.getX() - 1, context.getY(), context.getZ());
-            case EAST -> isFree(context.getX() + 1, context.getY(), context.getZ());
-            default -> isFree(context.getX(), context.getY(), context.getZ() + 1);
+            case EAST -> isFree( context.getX() + 1, context.getY(), context.getZ());
+            default -> isFree( context.getX(), context.getY(), context.getZ() + 1);
         };
     }
 
-    public boolean canGenLeft(Direction facing, PathContext context){
+    public boolean canGenLeft( Direction facing, PathContext context){
         return switch (facing) {
             case NORTH -> isFree(context.getX() - 1, context.getY(), context.getZ());
-            case WEST -> isFree(context.getX(), context.getY(), context.getZ() + 1);
-            case EAST -> isFree(context.getX(), context.getY(), context.getZ() - 1);
+            case WEST -> isFree( context.getX(), context.getY(), context.getZ() + 1);
+            case EAST -> isFree( context.getX(), context.getY(), context.getZ() - 1);
             default -> isFree(context.getX() + 1, context.getY(), context.getZ());
         };
     }
 
     public boolean canGenRight(Direction facing, PathContext context){
         return switch (facing) {
-            case NORTH -> isFree(context.getX() + 1, context.getY(), context.getZ());
+            case NORTH -> isFree( context.getX() + 1, context.getY(), context.getZ());
             case WEST -> isFree(context.getX(), context.getY(), context.getZ() - 1);
             case EAST -> isFree(context.getX(), context.getY(), context.getZ() + 1);
             default -> isFree(context.getX() - 1, context.getY(), context.getZ());
         };
     }
 
+
+    /*
+    Cross
+    [0][=][0]
+    [=][=][=]
+    [0][x][0]
+
+    Left
+    [0][=][0]
+    [=][=][0]
+    [0][x][0]
+
+    Right
+    [0][=][0]
+    [0][=][=]
+    [0][x][0]
+
+    Tee
+    [0][0][0]
+    [=][=][=]
+    [0][x][0]
+
+ */
+
     public boolean canGenBranch(Direction facing, PathContext context){
-        return canGenLeft(facing, context) && canGenRight(facing, context) && canGenStraight(facing, context);
+        boolean leftFree = canGenLeft(facing, context);
+        boolean rightFree = canGenRight(facing, context);
+        boolean straightFree = canGenRight(facing, context);
+        if(straightFree && leftFree && rightFree){
+            return true;
+        }
+        if(straightFree && leftFree){
+            return true;
+        }
+        if(straightFree && rightFree){
+            return true;
+        }
+        return rightFree && leftFree;
     }
 
-    public void addNodes(List<Node> layer, int layerNumber){
-        Map<ChunkCoordinate, Node> occupiedLayerLocations = layerNodes.getOrDefault(layerNumber, new HashMap<>());
-        for (Node node : layer) {
-            ChunkCoordinate chunkCoordinate = node.getCoordinate();
-            occupiedLayerLocations.put(chunkCoordinate, node);
+    public List<TypeBranch> getBranchAvailability(Direction facing, PathContext context){
+        boolean leftFree = canGenLeft(facing, context);
+        boolean rightFree = canGenRight(facing, context);
+        boolean straightFree = canGenRight(facing, context);
+        List<TypeBranch> branchTypes = new ArrayList<>();
+        if(straightFree && leftFree && rightFree){
+            branchTypes.add(TypeBranch.CROSS);
         }
-        layerNodes.put(layerNumber, occupiedLayerLocations);
+        if(straightFree && leftFree && !rightFree){
+            branchTypes.add(TypeBranch.LEFT);
+        }
+        if(straightFree && !leftFree && rightFree){
+            branchTypes.add(TypeBranch.RIGHT);
+        }
+        if(!straightFree && rightFree && leftFree){
+            branchTypes.add(TypeBranch.TEE);
+        }
+
+        return branchTypes;
     }
 
     public boolean isFree(int chunkX, int chunkY, int chunkZ){
@@ -164,6 +213,12 @@ public class DungeonBuilder {
             }
         }
         return true;
+    }
+
+    public void addNode(int layer, Node node){
+        Map<ChunkCoordinate, Node> nodes = layerNodes.getOrDefault(layer, new HashMap<>());
+        nodes.put(node.getCoordinate(), node);
+        layerNodes.put(layer, nodes);
     }
 
 }

@@ -2,9 +2,7 @@ package com.kennedysmithjava.dynamicdungeons;
 
 import com.kennedysmithjava.dynamicdungeons.nodes.*;
 import com.kennedysmithjava.dynamicdungeons.nodes.format.*;
-import com.kennedysmithjava.dynamicdungeons.util.ChunkCoordinate;
-import com.kennedysmithjava.dynamicdungeons.util.Direction;
-import com.kennedysmithjava.dynamicdungeons.util.LootTable;
+import com.kennedysmithjava.dynamicdungeons.util.*;
 import com.kennedysmithjava.dynamicdungeons.variables.ExpressionWrapper;
 import net.objecthunter.exp4j.Expression;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
@@ -86,8 +84,9 @@ public class DungeonLayerFormat {
     ExpressionWrapper cornerPredicate;
     ExpressionWrapper ascentPredicate;
     ExpressionWrapper descentPredicate;
+    ExpressionWrapper branchPredicate;
 
-    public DungeonLayerFormat(String layerName, LootTable lootTable, int maxPaths, int maxPathLength, ExpressionWrapper straightPredicate, ExpressionWrapper cornerPredicate, ExpressionWrapper ascentPredicate, ExpressionWrapper descentPredicate) {
+    public DungeonLayerFormat(String layerName, LootTable lootTable, int maxPaths, int maxPathLength, ExpressionWrapper straightPredicate, ExpressionWrapper cornerPredicate, ExpressionWrapper ascentPredicate, ExpressionWrapper descentPredicate, ExpressionWrapper branchPredicate) {
         this.layerName = layerName;
         this.lootTable = lootTable;
         this.maxPaths = maxPaths;
@@ -96,6 +95,7 @@ public class DungeonLayerFormat {
         this.cornerPredicate = cornerPredicate;
         this.ascentPredicate = ascentPredicate;
         this.descentPredicate = descentPredicate;
+        this.branchPredicate = branchPredicate;
     }
 
     public boolean shouldGenStraight(PathContext context){
@@ -129,98 +129,80 @@ public class DungeonLayerFormat {
         return expression.evaluate() == 1D;
     }
 
+    public boolean shouldGenBranch(PathContext context){
+        Expression expression = resolveContextPlaceholders(context, branchPredicate);
+        double eval = expression.evaluate();
+        return eval == 1D;
+    }
+
     public Node genStart(Direction direction, LayerContext layerContext, PathContext pathContext){
-        int currentX = pathContext.getX();
-        int currentY = pathContext.getY();
-        int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate = switch (direction) {
-            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
-            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
-            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
-            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
-        };
-        NodeStart node = new NodeStart(newChunkCoordinate);
+        NodeStart node = new NodeStart(pathContext.getCurrentCoordinate(), direction);
+        node.setColor(pathContext.getColor());
         pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
+        ChunkCoordinate newChunkCoordinate = direction.getFrontCoordinate(pathContext.getCurrentCoordinate());
         pathContext.setCurrentCoordinate(newChunkCoordinate);
         this.paste(node, newChunkCoordinate);
         return node;
     }
 
     public Node genStraight(Direction direction, LayerContext layerContext, PathContext pathContext){
-        int currentX = pathContext.getX();
-        int currentY = pathContext.getY();
-        int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate = switch (direction) {
-            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
-            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
-            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
-            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
-        };
-        NodeStraight node = new NodeStraight(newChunkCoordinate);
+        NodeStraight node = new NodeStraight(pathContext.getCurrentCoordinate(), direction);
+        node.setColor(pathContext.getColor());
         pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
+        ChunkCoordinate newChunkCoordinate = direction.getFrontCoordinate(pathContext.getCurrentCoordinate());
         pathContext.setCurrentCoordinate(newChunkCoordinate);
         this.paste(node, newChunkCoordinate);
         return node;
     }
 
     public Node genEnd(Direction direction, LayerContext layerContext, PathContext pathContext){
-        int currentX = pathContext.getX();
-        int currentY = pathContext.getY();
-        int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate = switch (direction) {
-            case NORTH -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
-            case WEST -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
-            case EAST -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
-            default -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
-        };
-        NodeEnd node = new NodeEnd(newChunkCoordinate);
+        NodeEnd node = new NodeEnd(pathContext.getCurrentCoordinate(), direction);
+        node.setColor(pathContext.getColor());
         pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
+        ChunkCoordinate newChunkCoordinate = direction.getFrontCoordinate(pathContext.getCurrentCoordinate());
         pathContext.setCurrentCoordinate(newChunkCoordinate);
         this.paste(node, newChunkCoordinate);
         return node;
     }
 
+
     public Node genLeft(Direction direction, LayerContext layerContext, PathContext pathContext){
-        int currentX = pathContext.getX();
-        int currentY = pathContext.getY();
-        int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate = switch (direction) {
-            case NORTH -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
-            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
-            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
-            default -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
-        };
-        NodeLeftCorner node = new NodeLeftCorner(newChunkCoordinate);
+        NodeLeftCorner node = new NodeLeftCorner(pathContext.getCurrentCoordinate(), direction);
+        node.setColor(pathContext.getColor());
         pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
+        ChunkCoordinate newChunkCoordinate = direction.getLeftCoordinate(pathContext.getCurrentCoordinate());
         pathContext.setCurrentCoordinate(newChunkCoordinate);
         this.paste(node, newChunkCoordinate);
         return node;
     }
 
     public Node genRight(Direction direction, LayerContext layerContext, PathContext pathContext){
-        int currentX = pathContext.getX();
-        int currentY = pathContext.getY();
-        int currentZ = pathContext.getZ();
-        ChunkCoordinate newChunkCoordinate = switch (direction) {
-            case NORTH -> new ChunkCoordinate(currentX + 1, currentY, currentZ);
-            case WEST -> new ChunkCoordinate(currentX, currentY, currentZ - 1);
-            case EAST -> new ChunkCoordinate(currentX, currentY, currentZ + 1);
-            default -> new ChunkCoordinate(currentX - 1, currentY, currentZ);
-        };
-        NodeRightCorner node = new NodeRightCorner(newChunkCoordinate);
+        NodeRightCorner node = new NodeRightCorner(pathContext.getCurrentCoordinate(), direction);
+        node.setColor(pathContext.getColor());
         pathContext.incrementLastNode(node.getType());
         layerContext.incrementNodes();
         pathContext.incrementNodes();
+        ChunkCoordinate newChunkCoordinate = direction.getRightCoordinate(pathContext.getCurrentCoordinate());
         pathContext.setCurrentCoordinate(newChunkCoordinate);
         this.paste(node, newChunkCoordinate);
+        return node;
+    }
+
+    public Node genBranch(Direction direction, TypeBranch branchType, LayerContext layerContext, PathContext pathContext){
+        NodeBranch node = new NodeBranch(pathContext.getCurrentCoordinate(), direction, branchType);
+        node.setColor(pathContext.getColor());
+        pathContext.incrementLastNode(node.getType());
+        layerContext.incrementNodes();
+        pathContext.incrementNodes();
+        /* This path ends */
         return node;
     }
 
